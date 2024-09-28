@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>随机号码生成器</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #282c34;
+            color: white;
+            font-family: Arial, sans-serif;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .container {
+            text-align: center;
+            z-index: 1;
+        }
+
+        #numberDisplay {
+            font-size: 20vw; /* 调整为屏幕的20% */
+            margin: 20px 0;
+            transition: transform 0.5s;
+        }
+
+        .input-group {
+            display: flex;
+            justify-content: center;
+            margin: 10px 0;
+        }
+
+        input {
+            width: 100px;
+            padding: 10px;
+            font-size: 16px;
+            border: none;
+            border-radius: 10px; /* 圆角 */
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            margin-right: 5px;
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            background-color: #007aff; /* 苹果风格蓝色 */
+            color: white;
+            border: none;
+            border-radius: 10px; /* 圆角 */
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: #005bb5; /* 悬停效果 */
+        }
+
+        .fireworks {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none; /* 使得礼花效果不影响其他元素 */
+            z-index: 0;
+        }
+
+        .firework {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            animation: explode 1s forwards;
+            opacity: 0; /* 初始透明度 */
+        }
+
+        @keyframes explode {
+            0% {
+                transform: scale(1);
+                opacity: 1;
+            }
+            50% {
+                opacity: 1; /* 50%时完全可见 */
+            }
+            100% {
+                transform: scale(4); /* 调整爆炸效果大小 */
+                opacity: 0;
+            }
+        }
+
+        .signature {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            font-size: 14px;
+            color: white;
+            opacity: 0.7;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div id="numberDisplay">0</div>
+        <div class="input-group">
+            <input type="number" id="minNumber" placeholder="最小号码" min="0" max="999">
+            <input type="number" id="maxNumber" placeholder="最大号码" min="0" max="999">
+            <button id="generate">开始</button>
+        </div>
+        <div class="fireworks" id="fireworks"></div>
+        <div class="signature">Designed by Martinlu</div>
+    </div>
+    <script>
+        let isGenerating = false;
+        let interval;
+        let min, max;
+
+        function generateRandomNumber() {
+            const randomNum = Math.floor(Math.random() * (max - min + 1)) + min; // 确保数字在指定范围内
+            document.getElementById('numberDisplay').textContent = randomNum;
+            createFireworks();
+        }
+
+        function createFireworks() {
+            const fireworks = document.getElementById('fireworks');
+
+            for (let i = 0; i < 150; i++) { // 增加烟花数量
+                const firework = document.createElement('div');
+                firework.className = 'firework';
+                firework.style.left = Math.random() * 100 + 'vw';
+                firework.style.top = Math.random() * 100 + 'vh';
+                firework.style.backgroundColor = `hsl(${Math.random() * 360}, 100%, 50%)`;
+                firework.style.width = `${Math.random() * 20 + 10}px`; // 随机宽度
+                firework.style.height = firework.style.width; // 使高度与宽度相同
+                firework.style.opacity = Math.random(); // 随机透明度
+                fireworks.appendChild(firework);
+
+                setTimeout(() => {
+                    firework.remove();
+                }, 1000);
+            }
+        }
+
+        document.getElementById('generate').addEventListener('click', function () {
+            const button = this;
+            min = parseInt(document.getElementById('minNumber').value);
+            max = parseInt(document.getElementById('maxNumber').value);
+
+            // 验证输入
+            if (isNaN(min) || isNaN(max) || min < 0 || max > 999 || min >= max) {
+                alert('请输入有效的3位数区间');
+                return;
+            }
+
+            if (!isGenerating) {
+                isGenerating = true;
+                button.textContent = '确定'; // 更改按钮文本
+
+                // 开始滚动
+                interval = setInterval(() => {
+                    const randomNum = Math.floor(Math.random() * (max - min + 1)) + min; // 滚动数字
+                    document.getElementById('numberDisplay').textContent = randomNum;
+                }, 100); // 每100毫秒更新一次
+                
+            } else {
+                // 停止滚动并生成号码
+                clearInterval(interval);
+                generateRandomNumber();
+                button.textContent = '开始'; // 恢复按钮文本
+                isGenerating = false;
+            }
+        });
+
+        document.addEventListener('keydown', function (event) {
+            if (event.key === "Enter") { // 使用Enter键确认
+                document.getElementById('generate').click();
+            }
+        });
+    </script>
+</body>
+</html>
